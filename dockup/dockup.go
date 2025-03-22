@@ -2,11 +2,14 @@ package dockup
 
 import (
 	"context"
-	"io"
+	"fmt"
 	"os"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/docker/docker/api/types/image"
 	"github.com/docker/docker/client"
+	"github.com/fatih/color"
 )
 
 type Images struct {
@@ -41,7 +44,7 @@ func ListImages() []Images {
 	return tmp
 }
 
-func UpdateImages(listImage *[]Images) {
+func UpdateImages(listImage []Images) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 
@@ -50,15 +53,23 @@ func UpdateImages(listImage *[]Images) {
 	}
 	defer cli.Close()
 
-	for _, l := range *listImage {
+	for _, l := range listImage {
+		s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+		s.Prefix = l.name + " "
+		s.Start()
 		out, err := cli.ImagePull(ctx, l.name, image.PullOptions{})
 
+		s.Stop()
+
 		if err != nil {
-			panic(err)
+			red := color.New(color.FgRed).SprintFunc()
+			fmt.Printf("%s %s \n", l.name, red("FAILED"))
+
+		} else {
+			green := color.New(color.FgGreen).SprintFunc()
+			fmt.Printf("%s %s \n", l.name, green("UPDATED"))
 		}
 
 		defer out.Close()
-
-		io.Copy(os.Stdout, out)
 	}
 }
