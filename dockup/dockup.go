@@ -13,9 +13,9 @@ import (
 )
 
 type Images struct {
-	id     int
-	name   string
-	digest string
+	Id     int
+	Name   string
+	Digest string
 }
 
 func ListImages() []Images {
@@ -36,15 +36,15 @@ func ListImages() []Images {
 	}
 	for index, l := range listImage {
 		if index == 0 {
-			tmp[index] = Images{id: index, name: l.RepoTags[0], digest: l.ID}
+			tmp[index] = Images{Id: index, Name: l.RepoTags[0], Digest: l.ID}
 		} else {
-			tmp = append(tmp, Images{id: index, name: l.RepoTags[0], digest: l.ID})
+			tmp = append(tmp, Images{Id: index, Name: l.RepoTags[0], Digest: l.ID})
 		}
 	}
 	return tmp
 }
 
-func UpdateImages(listImage []Images) {
+func UpdateImages(listImage []string) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 
@@ -55,19 +55,19 @@ func UpdateImages(listImage []Images) {
 
 	for _, l := range listImage {
 		s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = l.name + " "
+		s.Prefix = l + " "
 		s.Start()
-		out, err := cli.ImagePull(ctx, l.name, image.PullOptions{})
+		out, err := cli.ImagePull(ctx, l, image.PullOptions{})
 
 		s.Stop()
 
 		if err != nil {
 			red := color.New(color.FgRed).SprintFunc()
-			fmt.Printf("%s %s \n", l.name, red("FAILED"))
+			fmt.Printf("%s %s \n", l, red("FAILED"))
 
 		} else {
 			green := color.New(color.FgGreen).SprintFunc()
-			fmt.Printf("%s %s \n", l.name, green("UPDATED"))
+			fmt.Printf("%s %s \n", l, green("UPDATED"))
 		}
 
 		defer out.Close()
