@@ -27,18 +27,28 @@ func ListImages() []Images {
 	}
 	defer cli.Close()
 
-	tmp := []Images{{}}
+	tmp := []Images{}
 
 	listImage, err := cli.ImageList(ctx, image.ListOptions{})
 
 	if err != nil {
 		panic(err)
 	}
+
 	for index, l := range listImage {
-		if index == 0 {
-			tmp[index] = Images{Id: index, Name: l.RepoTags[0], Digest: l.ID}
+
+		if len(l.RepoTags) > 0 {
+			tmp = append(tmp, Images{
+				Id:     index,
+				Name:   l.RepoTags[0],
+				Digest: l.ID},
+			)
 		} else {
-			tmp = append(tmp, Images{Id: index, Name: l.RepoTags[0], Digest: l.ID})
+			tmp = append(tmp, Images{
+				Id:     index,
+				Name:   l.ID,
+				Digest: l.ID},
+			)
 		}
 	}
 	return tmp
