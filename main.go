@@ -9,7 +9,6 @@ import (
 
 func main() {
 
-	//var selectedList []string
 	var confirm bool
 	var selectedList []string
 	var bindings string
@@ -18,7 +17,6 @@ func main() {
 
 	form := huh.NewForm(
 		huh.NewGroup(
-
 			huh.NewMultiSelect[string]().
 				Title("Choice a image to updade").
 				OptionsFunc(func() []huh.Option[string] {
@@ -30,7 +28,6 @@ func main() {
 				}, bindings).
 				Value(&selectedList),
 		),
-
 		huh.NewGroup(
 			huh.NewConfirm().
 				Title("Do you want to restart the containers that use the selected images?").
