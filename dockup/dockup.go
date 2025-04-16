@@ -67,19 +67,23 @@ func UpdateImages(imageList []string) {
 
 	for _, l := range imageList {
 		s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
-		s.Prefix = l + " "
+
+		inspect, _ := cli.ImageInspect(ctx, l)
+
+		s.Prefix = inspect.RepoTags[0] + " "
 		s.Start()
-		_, err := cli.ImagePull(ctx, l, image.PullOptions{})
+
+		_, err := cli.ImagePull(ctx, inspect.RepoTags[0], image.PullOptions{})
 
 		s.Stop()
 
 		if err != nil {
 			red := color.New(color.FgRed).SprintFunc()
-			fmt.Printf("%s %s \n", l, red("FAILED"))
+			fmt.Printf("%s %s \n", inspect.RepoTags[0], red("FAILED"))
 
 		} else {
 			green := color.New(color.FgGreen).SprintFunc()
-			fmt.Printf("%s %s \n", l, green("UPDATED"))
+			fmt.Printf("%s %s \n", inspect.RepoTags[0], green("UPDATED"))
 		}
 	}
 }
@@ -103,12 +107,20 @@ func RestartContainers(imageList []string) {
 			ImageIdPrefixRemoved := strings.TrimPrefix(c.ImageID, "sha256:")
 
 			if ImageIdPrefixRemoved == image {
+
+				s := spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))
+				s.Prefix = c.Names[0] + " "
+				s.Start()
+
 				cli.ContainerRestart(ctx, c.ID, container.StopOptions{})
+
+				s.Stop()
 
 				cleanedName := strings.TrimPrefix(c.Names[0], "/")
 
-				blue := color.New(color.FgBlue).SprintFunc()
-				fmt.Printf("%s %s ", blue(cleanedName), blue("HAS BEEN RESTARTED\n"))
+				blue := color.New(color.FgCyan).SprintFunc()
+				fmt.Printf("%s %s ", cleanedName, blue("HAS BEEN RESTARTED\n"))
+
 			}
 		}
 	}

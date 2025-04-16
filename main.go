@@ -14,14 +14,14 @@ func main() {
 	var selectedList []string
 	var bindings string
 
-	digestImages := []string{}
+	var digestImages []string
 
 	imageList := dockup.ImageList()
 
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewMultiSelect[string]().
-				Title("Choice a image to updade").
+				Title("Choice a image to update").
 				OptionsFunc(func() []huh.Option[string] {
 					var options []huh.Option[string]
 					for _, l := range imageList {
@@ -54,7 +54,7 @@ func main() {
 	}
 
 	if len(selectedList) > 0 {
-		dockup.UpdateImages(selectedList)
+		dockup.UpdateImages(digestImages)
 
 		if confirm {
 			dockup.RestartContainers(digestImages)
